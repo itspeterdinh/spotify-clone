@@ -7,11 +7,12 @@ import {
   ReplyIcon,
   VolumeUpIcon,
 } from "@heroicons/react/outline";
-import React from "react";
+import React, { ChangeEventHandler } from "react";
 import { useSongContext } from "../contexts/SongContext";
 import useSpotify from "../hooks/useSpotify";
 import { SongReducerActionType } from "../types";
 import Image from "next/image";
+import { useDebouncedCallback } from "use-debounce";
 
 const Player = () => {
   const spotifyApi = useSpotify();
@@ -60,6 +61,23 @@ const Player = () => {
     });
   };
 
+  const debouncedAdjustVolume = useDebouncedCallback((volume: number) => {
+    spotifyApi.setVolume(volume);
+  }, 500);
+
+  const handleVolumeChange: ChangeEventHandler<HTMLInputElement> = (event) => {
+    const volume = Number(event.target.value);
+
+    if (!deviceId) return;
+
+    debouncedAdjustVolume(volume);
+
+    dispatchSongAction({
+      type: SongReducerActionType.SetVolume,
+      payload: volume,
+    });
+  };
+
   return (
     <div className="h-24 bg-gradient-to-b from-black to-gray-900 grid grid-cols-3 text-xs md:text-base px-2 md:px-8">
       <div className="flex items-center space-x-4">
@@ -99,7 +117,14 @@ const Player = () => {
       </div>
       <div className="flex justify-end items-center pr-5 space-x-3 md:space-x-4">
         <VolumeUpIcon className="icon-playback" />
-        <input type="range" min={0} max={100} className="w-20 md:w-auto" />
+        <input
+          type="range"
+          min={0}
+          max={100}
+          className="w-20 md:w-auto"
+          value={volume}
+          onChange={handleVolumeChange}
+        />
       </div>
     </div>
   );
