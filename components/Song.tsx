@@ -42,6 +42,7 @@ const Song = ({ item: { track }, itemIndex }: Props) => {
       },
     });
   };
+
   return (
     <div
       className="grid grid-cols-2 text-gray-500 px-5 py-4 hover:bg-gray-900 rounded-lg cursor-pointer"
